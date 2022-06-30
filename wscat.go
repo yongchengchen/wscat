@@ -12,6 +12,7 @@ import (
 	"golang.org/x/net/websocket"
 	"net/url"
 	"os"
+	"io"
 )
 
 type wscatConfig struct {
@@ -22,6 +23,7 @@ type wscatConfig struct {
 	Writer       *os.File
 	SendFilename string
 	RecvFilename string
+	SuccessEof   string   //check last line of the cat, if match, return success
 }
 
 func (wscat *wscatConfig) run() {
@@ -51,11 +53,19 @@ func (wscat *wscatConfig) run() {
 	if wscat.Writer != os.Stdout {
 		defer wscat.Writer.Close()
 	}
+	var lastMsg string
 	for {
 		var wsMessage string
 		if err := websocket.Message.Receive(wscat.Conn, &wsMessage); err != nil {
+			if err == io.EOF {
+				// fmt.Printf("%+v\n", err) //it's normal finish
+				if wscat.SuccessEof == "" || lastMsg == wscat.SuccessEof {
+				       os.Exit(0)
+				}
+			}
 			panic("\x1b[31m[Fatal] receive error\x1b[0m")
 		}
+		lastMsg = wsMessage
 		fmt.Fprintln(wscat.Writer, "\x1b[32m"+wsMessage+"\x1b[0m")
 	}
 }
@@ -64,6 +74,7 @@ func (wscat *wscatConfig) getOptions() {
 	flag.StringVar(&wscat.Url, "c", "", "specified an WebSocket URL to connect to, ex) ws://echo.websocket.org/")
 	flag.StringVar(&wscat.SendFilename, "i", "", "specified a filename which inputs sending data from.")
 	flag.StringVar(&wscat.RecvFilename, "o", "", "specified a filename which outputs receiving data to.")
+	flag.StringVar(&wscat.SuccessEof, "e", "", "specified a success flag string which should match the last line data from wss")
 
 	flag.Parse()
 }
