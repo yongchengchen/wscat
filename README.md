@@ -25,8 +25,10 @@ $ ./wscat -c ws://echo.websocket.org
 You can use -i option when a sending data to a WebSocket server reads from a file. Also you can use -o option when a receiving data from a WebSocket server saves to a file you want.
 When you don't specify any options, sending data reads stdio and receiving data writes stdout.
 
+You can use -e to check the last line of the result if match with the string, then will return command status code 0.
+
 ```shell
-$ ./wscat -c ws://echo.websocket.org -i send.txt -o recv.txt
+$ ./wscat -c ws://echo.websocket.org -i send.txt -o recv.txt -e COMMAND_SUCCESS
 ```
 
 ## License
