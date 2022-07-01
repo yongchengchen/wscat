@@ -9,6 +9,7 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"strings"
 	"golang.org/x/net/websocket"
 	"net/url"
 	"os"
@@ -38,7 +39,11 @@ func MyDial(url_, protocol, origin string, resolve string) (ws *websocket.Conn, 
 		config.Protocol = []string{protocol}
 	}
 	if resolve != "" {
-		config.Location, err = url.ParseRequestURI("ws://" + resolve)
+		if strings.HasPrefix(resolve, "ws") {
+			config.Location, err = url.ParseRequestURI(resolve)
+		} else {
+			config.Location, err = url.ParseRequestURI("ws://" + resolve)
+		}
 	}
 	return websocket.DialConfig(config)
 }
