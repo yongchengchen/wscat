@@ -27,8 +27,10 @@ When you don't specify any options, sending data reads stdio and receiving data 
 
 You can use -e to check the last line of the result if match with the string, then will return command status code 0.
 
+You can use -resolve to resolve the domain to a specific ip&port
+
 ```shell
-$ ./wscat -c ws://echo.websocket.org -i send.txt -o recv.txt -e COMMAND_SUCCESS
+$ ./wscat -c ws://echo.websocket.org -i send.txt -o recv.txt -e COMMAND_SUCCESS -resolve 127.0.0.1:8080
 ```
 
 ## License

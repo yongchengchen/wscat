@@ -25,10 +25,26 @@ type wscatConfig struct {
 	RecvFilename string
 	SuccessEof   string   //check last line of the cat, if match, return success
 	Raw   string   //check last line of the cat, if match, return success
+	IpPort    string   //bind the domain to the ip and port. could be ip:port or ip
+}
+
+//support ip address resolve to replace wobsocket's Dial function
+func MyDial(url_, protocol, origin string, resolve string) (ws *websocket.Conn, err error) {
+	config, err := websocket.NewConfig(url_, origin)
+	if err != nil {
+		return nil, err
+	}
+	if protocol != "" {
+		config.Protocol = []string{protocol}
+	}
+	if resolve != "" {
+		config.Location, err = url.ParseRequestURI("ws://" + resolve)
+	}
+	return websocket.DialConfig(config)
 }
 
 func (wscat *wscatConfig) run() {
-	wsConn, err := websocket.Dial(wscat.Url, "tcp", wscat.Origin)
+	wsConn, err := MyDial(wscat.Url, "tcp", wscat.Origin, wscat.IpPort)
 	if err != nil {
 		pmessage := fmt.Sprintf("\x1b[31m[Fatal] cannot connect to server: %s\x1b[0m", wscat.Url)
 		panic(pmessage)
@@ -81,6 +97,7 @@ func (wscat *wscatConfig) getOptions() {
 	flag.StringVar(&wscat.RecvFilename, "o", "", "specified a filename which outputs receiving data to.")
 	flag.StringVar(&wscat.SuccessEof, "e", "", "specified a success flag string which should match the last line data from wss")
 	flag.StringVar(&wscat.Raw, "r", "", "raw format output without color")
+	flag.StringVar(&wscat.IpPort, "resolve", "", "specified the ip and port for the domain")
 
 	flag.Parse()
 }
