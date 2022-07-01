@@ -24,6 +24,7 @@ type wscatConfig struct {
 	SendFilename string
 	RecvFilename string
 	SuccessEof   string   //check last line of the cat, if match, return success
+	Raw   string   //check last line of the cat, if match, return success
 }
 
 func (wscat *wscatConfig) run() {
@@ -66,7 +67,11 @@ func (wscat *wscatConfig) run() {
 			panic("\x1b[31m[Fatal] receive error\x1b[0m")
 		}
 		lastMsg = wsMessage
-		fmt.Fprintln(wscat.Writer, "\x1b[32m"+wsMessage+"\x1b[0m")
+		if wscat.Raw == "" {
+			fmt.Fprintln(wscat.Writer, "\x1b[32m"+wsMessage+"\x1b[0m")
+		} else {
+			fmt.Fprintln(wscat.Writer, wsMessage)
+		}
 	}
 }
 
@@ -75,6 +80,7 @@ func (wscat *wscatConfig) getOptions() {
 	flag.StringVar(&wscat.SendFilename, "i", "", "specified a filename which inputs sending data from.")
 	flag.StringVar(&wscat.RecvFilename, "o", "", "specified a filename which outputs receiving data to.")
 	flag.StringVar(&wscat.SuccessEof, "e", "", "specified a success flag string which should match the last line data from wss")
+	flag.StringVar(&wscat.Raw, "r", "", "raw format output without color")
 
 	flag.Parse()
 }
