@@ -122,7 +122,11 @@ func (wscat *wscatConfig) init() {
 	if err != nil {
 		panic("\x1b[31mURL parsing\x1b[0m")
 	}
-	wscat.Origin = "http://" + url.Host
+	if strings.HasPrefix(wscat.Url, "wss") {
+		wscat.Origin = "https://" + url.Host
+	} else {
+		wscat.Origin = "http://" + url.Host
+	}
 
 	if wscat.SendFilename == "" {
 		wscat.Reader = os.Stdin
