@@ -38,11 +38,16 @@ func MyDial(url_, protocol, origin string, resolve string) (ws *websocket.Conn, 
 	if protocol != "" {
 		config.Protocol = []string{protocol}
 	}
+
 	if resolve != "" {
 		if strings.HasPrefix(resolve, "ws") {
 			config.Location, err = url.ParseRequestURI(resolve)
 		} else {
-			config.Location, err = url.ParseRequestURI("ws://" + resolve)
+			if strings.HasPrefix(url_, "wss") {
+				config.Location, err = url.ParseRequestURI("wss://" + resolve)
+			} else {
+				config.Location, err = url.ParseRequestURI("ws://" + resolve)
+			}
 		}
 	}
 	return websocket.DialConfig(config)
